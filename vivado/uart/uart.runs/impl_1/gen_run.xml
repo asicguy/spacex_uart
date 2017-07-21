@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenRun Id="impl_1" LaunchPart="xc7z020clg484-1" LaunchTime="1433433423">
+  <File Type="WBT-USG" Name="usage_statistics_webtalk.html"/>
+  <File Type="RDI-RDI" Name="uart.vdi"/>
+  <File Type="BG-DRC" Name="uart.drc"/>
+  <File Type="BG-BGN" Name="uart.bgn"/>
+  <File Type="BITSTR-SYSDEF" Name="uart.sysdef"/>
+  <File Type="BITSTR-MMI" Name="uart.mmi"/>
+  <File Type="BITSTR-BMM" Name="uart_bd.bmm"/>
+  <File Type="BITSTR-NKY" Name="uart.nky"/>
+  <File Type="BITSTR-RBT" Name="uart.rbt"/>
+  <File Type="BITSTR-MSK" Name="uart.msk"/>
+  <File Type="BG-BIN" Name="uart.bin"/>
+  <File Type="BG-BIT" Name="uart.bit"/>
+  <File Type="POSTROUTE-PHYSOPT-TIMING-RPX" Name="uart_timing_summary_postroute_physopted.rpx"/>
+  <File Type="POSTROUTE-PHYSOPT-TIMING-PB" Name="uart_timing_summary_postroute_physopted.pb"/>
+  <File Type="POSTROUTE-PHYSOPT-TIMING" Name="uart_timing_summary_postroute_physopted.rpt"/>
+  <File Type="POSTROUTE-PHYSOPT-DCP" Name="uart_postroute_physopt.dcp"/>
+  <File Type="ROUTE-SIMILARITY" Name="uart_incremental_reuse_routed.rpt"/>
+  <File Type="ROUTE-TIMING-RPX" Name="uart_timing_summary_routed.rpx"/>
+  <File Type="ROUTE-TIMING-PB" Name="uart_timing_summary_routed.pb"/>
+  <File Type="ROUTE-TIMINGSUMMARY" Name="uart_timing_summary_routed.rpt"/>
+  <File Type="ROUTE-STATUS-PB" Name="uart_route_status.pb"/>
+  <File Type="ROUTE-STATUS" Name="uart_route_status.rpt"/>
+  <File Type="ROUTE-PWR-SUM" Name="uart_power_summary_routed.pb"/>
+  <File Type="ROUTE-PWR" Name="uart_power_routed.rpt"/>
+  <File Type="ROUTE-DRC-PB" Name="uart_drc_routed.pb"/>
+  <File Type="ROUTE-DRC" Name="uart_drc_routed.rpt"/>
+  <File Type="ROUTE-DCP" Name="uart_routed.dcp"/>
+  <File Type="PHYSOPT-DRC" Name="uart_drc_physopted.rpt"/>
+  <File Type="PHYSOPT-DCP" Name="uart_physopt.dcp"/>
+  <File Type="POSTPLACE-PWROPT-DCP" Name="uart_postplace_pwropt.dcp"/>
+  <File Type="PLACE-PRE-SIMILARITY" Name="uart_incremental_reuse_pre_placed.rpt"/>
+  <File Type="PLACE-SIMILARITY" Name="uart_incremental_reuse_placed.rpt"/>
+  <File Type="PLACE-CTRL" Name="uart_control_sets_placed.rpt"/>
+  <File Type="PLACE-UTIL-PB" Name="uart_utilization_placed.pb"/>
+  <File Type="PLACE-UTIL" Name="uart_utilization_placed.rpt"/>
+  <File Type="PLACE-CLK" Name="uart_clock_utilization_placed.rpt"/>
+  <File Type="PLACE-IO" Name="uart_io_placed.rpt"/>
+  <File Type="PLACE-DCP" Name="uart_placed.dcp"/>
+  <File Type="PWROPT-DRC" Name="uart_drc_pwropted.rpt"/>
+  <File Type="PWROPT-DCP" Name="uart_pwropt.dcp"/>
+  <File Type="OPT-DRC" Name="uart_drc_opted.rpt"/>
+  <File Type="OPT-DCP" Name="uart_opt.dcp"/>
+  <File Type="PA-TCL" Name="uart.tcl"/>
+  <File Type="RUN-STRAT" Name="$PDATADIR/runs/impl_1/impl_1.psg"/>
+  <File Type="RUN-SRCS" Name="$PDATADIR/runs/impl_1/sources.xml"/>
+  <File Type="RUN-CONSTRS" Name="$PDATADIR/runs/impl_1/constrs_in.xml"/>
+  <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
+    <Filter Type="Srcs"/>
+    <File Path="$PPRDIR/../../rtl/sync_fifo.v">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PPRDIR/../../rtl/uart_cpu.v">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PPRDIR/../../rtl/uart.v">
+      <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="implementation"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <Config>
+      <Option Name="DesignMode" Val="RTL"/>
+      <Option Name="TopModule" Val="uart"/>
+      <Option Name="TopAutoSet" Val="TRUE"/>
+    </Config>
+  </FileSet>
+  <FileSet Name="constrs_in" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1">
+    <Filter Type="Constrs"/>
+    <Config>
+      <Option Name="ConstrsType" Val="XDC"/>
+    </Config>
+  </FileSet>
+  <Strategy Version="1" Minor="2">
+    <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2014"/>
+    <Step Id="init_design"/>
+    <Step Id="opt_design"/>
+    <Step Id="power_opt_design"/>
+    <Step Id="place_design"/>
+    <Step Id="post_place_power_opt_design"/>
+    <Step Id="phys_opt_design"/>
+    <Step Id="route_design"/>
+    <Step Id="post_route_phys_opt_design"/>
+    <Step Id="write_bitstream"/>
+  </Strategy>
+</GenRun>

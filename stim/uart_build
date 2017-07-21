@@ -1,0 +1,7 @@
++libext+.vo+
++libext+.v+
+
+../stim/tb_uart.v
+../rtl/sync_fifo.v
+../rtl/uart_cpu.v
+../rtl/uart.v

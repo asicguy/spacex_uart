@@ -1,0 +1,248 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (C) 2014 Francis Bruno, All Rights Reserved
+// 
+//  This program is free software; you can redistribute it and/or modify it 
+//  under the terms of the GNU General Public License as published by the Free 
+//  Software Foundation; either version 3 of the License, or (at your option) 
+//  any later version.
+//
+//  This program is distributed in the hope that it will be useful, but 
+//  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+//  or FITNESS FOR A PARTICULAR PURPOSE. 
+//  See the GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License along with
+//  this program; if not, see <http://www.gnu.org/licenses>.
+//
+//  This code is available under licenses for commercial use. Please contact
+//  Francis Bruno for more information.
+//
+//  http://www.gplgpu.com
+//  http://www.asicsolutions.com
+//  
+//  Title       :  Simple UART CPU interface
+//  File        :  uart_cpu.v
+//  Author      :  Frank Bruno
+//  Created     :  28-May-2015
+//  RCS File    :  $Source:$
+//  Status      :  $Id:$
+//
+//
+///////////////////////////////////////////////////////////////////////////////
+//
+//  Description :
+//  CPU interface for simple UART core
+//
+//////////////////////////////////////////////////////////////////////////////
+//
+//  Modules Instantiated:
+//
+///////////////////////////////////////////////////////////////////////////////
+//
+//  Modification History:
+//
+//  $Log:$
+//
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+`timescale 1ns / 10ps
+
+module uart_cpu
+  (
+   // Utility signals
+   input 	     sys_clk, // 100 Mhz for this example
+   input 	     sys_rstn, // Active low reset
+
+   // CPU interface
+   input 	     cpu_csn, // Chip select for CPU interface
+   input 	     cpu_rdwn, // 1 = Read, 0 = write
+   input [4:0] 	     cpu_addr, // Address bus
+   input [7:0] 	     cpu_din, // Data into core from CPU
+   output 	     cpu_ready, // CPU accepts request
+   output reg [7:0]  cpu_dout, // Data from Core to CPU
+   output reg 	     cpu_valid, // Read is valid
+   output reg 	     cpu_int, // interrupt
+
+   // Registers to design
+   output reg [15:0] baud_terminal_count, // Terminal count for baud en
+
+   // RX interface
+   input 	     rx_fifo_push, // Push data from RX interface
+   input [12:0]      rx_fifo_din, // Data from RX interface
+   input 	     rx_parity_err, // Parity error flag on RX
+   
+   // External pins
+   input 	     uart_cts, // Clear to send
+   input 	     uart_rx, // RX pin
+   output 	     uart_rts, // Request to send
+   output 	     uart_tx   // TX pin
+   );
+
+   localparam
+     STATUS     = 5'h0, // Status registers
+     INT_ENABLE = 5'h1, // Interrupt enable register
+     INT_STATUS = 5'h2, // Interrupt Status register
+     TX_CONTROL = 5'h3, // TX Control register
+     TX_FIFO_LO = 5'h4, // Low watermark on FIFO
+     TX_FIFO_HI = 5'h5, // High watermark on FIFO
+     TX_FIFO_COUNT = 5'h6, // TX FIFO Current data count
+     RX_CONTROL = 5'h7, // RX Control register
+     RX_FIFO_LO = 5'h8, // Low watermark on FIFO
+     RX_FIFO_HI = 5'h9, // High watermark on FIFO
+     RX_FIFO_COUNT = 5'hA, // RX FIFO current data count
+     // These registers set the baud rate:
+     // Baud    7x speed  Period      BAUDCNT_HI BAUDCNT_LO
+     // 300     2100      476190.476  8'hBA      8'h03
+     // 1200    8400      119047.619  8'h2E      8'h81
+     // 2400    16800      59523.810  8'h17      8'h40
+     // 4800    33600      29761.905  8'h0B      8'hA0
+     // 9600    67200      14880.952  8'h05      8'hD0
+     // 14400   100800      9920.635  8'h03      8'hE0
+     // 19200   134400      7440.476  8'h02      8'hE8
+     // 28800   201600      4960.317  8'h01      8'hF0
+     // 38400   268800      3720.238  8'h01      8'h74
+     // 57600   403200      2480.159  8'h00      8'hF8
+     BAUDCNT_LO = 5'hB, // Lower 8 bits of caud count register
+     BAUDCNT_HI = 5'hC, // Upper 8 bits of caud count register
+     TX_FIFO_LO = 5'hD, // tx_fifo_din[7:0]
+     TX_FIFO_HI = 5'hE, // tx_fifo_din[12:8]
+     RX_FIFO_LO = 5'hF, // rx_fifo_dout[7:0]
+     RX_FIFO_HI = 5'h10; // rx_fifo_dout[12:8]
+
+   reg [12:0] 	     rx_fifo_out;        // Data from the FIFO
+   reg 		     rx_fifo_pop;        // Pop data from the RX fifo
+   reg 		     rx_fifo_empty;      // FIFO empty
+   reg [3:0] 	     rx_fifo_count;      // {full, count[2:0]}
+   reg [12:0] 	     rx_fifo_store[7:0]; // Storage for FIFO
+   reg [2:0] 	     rx_fifo_thresh_lo;  // Low watermark
+   reg [2:0] 	     rx_fifo_thresh_hi;  // High watermark
+
+   // status flags
+   reg 		     read_on_empty; // A read occured on an empty FIFO
+
+   reg [7:0] 	     isr_enable;    // Interrupt status enables 1 = enable
+   reg [7:0] 	     isr_status;    // Interrupt status - write 1 to clear bit
+
+   reg 		     tx_en;         // enable TX path
+   reg 		     tx_parity;     // 0 = even parity, 1 = odd
+   reg 		     force_rts;     // Force RTS value for testing
+   reg 		     force_rts_val; // force value on RTS
+   
+   
+   assign rx_fifo_full 	= rx_fifo_count[3];
+   
+   // We can accept a read anytime
+   // Only accept a write when the FIFO is not full. Software should
+   // make sure there is data available prior to initiating a read to avoid
+   // locking the bus
+   assign cpu_ready 	= ~cpu_csn & (cpu_rdwrn | ~cpu_rdwrn & ~tx_fifo_full);
+   always @(posedge sys_clk) begin
+
+      // defaults
+      rx_fifo_pop  <= 1'b0;
+      tx_fifo_push <= 1'b0;
+
+      // Read bus
+      case (cpu_addr)
+	STATUS:        cpu_dout <= {voting,
+				    parity_error,
+				    rx_fifo_empty,
+				    rx_high,
+				    rx_low,
+				    tx_fifo_full,
+				    tx_high,
+				    tx_low};
+	INT_ENABLE:    cpu_dout <= isr_enable;
+	INT_STATUS:    cpu_dout <= isr_status;
+	TX_CONTROL:    cpu_dout <= {4'h0,
+				    force_rts_val,
+				    force_rts,
+				    tx_parity,
+				    tx_en};
+	TX_FIFO_LO:    cpu_dout <= {5'h0, tx_fifo_thresh_lo};
+	TX_FIFO_HI:    cpu_dout <= {5'h0, tx_fifo_thresh_hi};
+	TX_FIFO_COUNT: cpu_dout <= {5'h0, tx_fifo_count};
+	RX_CONTROL:    cpu_dout <= {4'h0,
+				    force_cts_val,
+				    force_cts,
+				    rx_parity,
+				    rx_en};
+	RX_FIFO_LO:    cpu_dout <= {5'h0, rx_fifo_thresh_lo};
+	RX_FIFO_HI:    cpu_dout <= {5'h0, rx_fifo_thresh_hi};
+	RX_FIFO_COUNT: cpu_dout <= {5'h0, rx_fifo_count};
+	BAUDCNT_LO:    cpu_dout <= baud_terminal_count[7:0];
+	BAUDCNT_HI:    cpu_dout <= baud_terminal_count[15:8];
+	RX_FIFO_LO:    cpu_dout <= rx_fifo_out[7:0];
+	RX_FIFO_HI:    cpu_dout <= rx_fifo_out[12:8];
+	default:       cpu_dout <= 8'h0;
+      endcase // case (cpu_addr)
+
+      case (cpu_state)
+	CPU_IDLE: begin
+	   if (~cpu_csn)
+	     if (cpu_rdwrn)
+	       if (~rx_fifo_empty) begin
+		  rx_fifo_pop <= 1'b1;
+		  cpu_state   <= CPU_RD_WAIT;
+	       end else begin
+		  read_on_empty <= 1'b1;
+		  cpu_state   <= CPU_RD_DONE;
+	       end
+	     else begin
+		case (cpu_addr)
+		  INT_ENABLE: isr_enable <= cpu_din;
+		  // status bits cleared by writing a '1'
+		  INT_STATUS: isr_status <= isr_status & ~cpu_din;
+		  TX_CONTROL: begin
+		     tx_en 	   <= cpu_din[0];
+		     tx_parity 	   <= cpu_din[1];
+		     force_rts 	   <= cpu_din[2];
+		     force_rts_val <= cpu_din[3];
+		  end
+		  TX_FIFO_LO: tx_fifo_thresh_lo <= cpu_din[2:0];
+		  TX_FIFO_HI: tx_fifo_thresh_hi <= cpu_din[2:0];
+		  RX_CONTROL: begin
+		     force_cts_val <= cpu_din[3];
+		     force_cts     <= cpu_din[2];
+		     rx_parity     <= cpu_din[1];
+		     rx_en         <= cpu_din[0];
+		  end
+		  RX_FIFO_LO: rx_fifo_thresh_lo <= cpu_din[2:0];
+		  RX_FIFO_HI: rx_fifo_thresh_hi <= cpu_din[2:0];
+		  BAUDCNT_LO: baud_terminal_count[7:0] <= cpu_din;
+		  BAUDCNT_HI: baud_terminal_count[15:8] <= cpu_din;
+		  TX_FIFO_LO: tx_fifo_in[7:0]  <= cpu_din;
+		  TX_FIFO_HI: begin
+		     tx_fifo_in[12:8]  <= cpu_din[12:8];
+		     tx_fifo_push      <= 1'b1;
+		  default:    cpu_dout <= 8'h0;
+		endcase // case (cpu_addr)
+	     end // else: !if(~rx_fifo_empty)
+	end // case: CPU_IDLE
+      endcase // case (cpu_state)
+
+      // Reset clause
+      if (~cpu_rstn) begin
+	 cpu_state 	     <= CPU_IDLE;
+	 read_on_empty 	     <= 1'b1;
+	 isr_enable 	     <= 8'h0;
+	 isr_status 	     <= 8'h0;
+	 tx_en 		     <= 1'b1;
+	 tx_parity 	     <= 1'b0; // even parity
+	 force_rts 	     <= 1'b0; // don't force
+	 tx_fifo_thresh_lo   <= 3'h2;
+	 tx_fifo_thresh_hi   <= 3'h6;
+	 force_cts 	     <= 1'b0;
+	 rx_parity 	     <= 1'b0;
+	 rx_en 		     <= 1'b1;
+	 rx_fifo_thresh_lo   <= 3'h2;
+	 rx_fifo_thresh_hi   <= 3'h6;
+	 baud_terminal_count <= 16'd248; // 57600
+      end // if (~cpu_rstn)
+      
+   end // always @ (posedge sys_clk)
+   
+endmodule // uart

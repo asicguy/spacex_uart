@@ -1,0 +1,33 @@
+This directory contains the UART project to be presented by Frank Bruno at SpaceX. The directory structure is as follows:
+
+present/      Presentation PPTX
+rtl/          RTL Source code in Verilog
+rtl/old/      Contains an alternative cpu interface, not debugged
+sim/          Simulation directory
+sim/tests/    Tests for the UART
+stim/         Testbench in verilog, build list, tasks
+
+The UART is structured as follows:
+tb_uart.v     Testbench
+uart.v        Top level of the UART
+uart_cpu.v    CPU interface
+sync_fifo.v   Synchronous FIFO
+async_fifo.v  Asynchronous FIFO (An example, not used in the design)
+
+To run the simulations, change to sim/
+runsim -a     
+Runs all the tests under the sim/tests/ directory. Tests must be in the form:
+test.h for uncompressed test
+test.h.gz for compressed tests
+
+There is little error checking, so make sure they are named properly
+
+runsim -f <test.h | test.h.gz>
+
+Will run a single test
+
+When runsim completes, if the test passed, it will be listed in the file "passed", if it fails, it will be in "failed".
+
+The log file will be stored in the results/ directory.
+
+There is a cleanup script in the sim directory: 'cleanup'

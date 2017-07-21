@@ -1,0 +1,13 @@
+rm core
+rm *~
+rm *.vpd
+rm -rf work
+rm failed
+rm passed
+rm *.wlf
+rm the_test.h
+rm verilog.log
+rm transcript
+rm results/*
+rm vish*
+

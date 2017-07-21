@@ -1,0 +1,19 @@
+#-----------------------------------------------------------
+# Vivado v2014.4 (64-bit)
+# SW Build 1071353 on Tue Nov 18 16:47:07 MST 2014
+# IP Build 1070531 on Tue Nov 18 01:10:18 MST 2014
+# Start of session at: Sat Jun  6 08:21:10 2015
+# Process ID: 26998
+# Log file: /home/fbruno/projects/spacex/uart/vivado/vivado.log
+# Journal file: /home/fbruno/projects/spacex/uart/vivado/vivado.jou
+#-----------------------------------------------------------
+start_gui
+open_project /home/fbruno/projects/spacex/uart/vivado/uart/uart.xpr
+Scanning sources...
+Finished scanning sources
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1704] No user IP repositories specified
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository '/opt/Xilinx/Vivado/2014.4/data/ip'.
+INFO: [Ipptcl 7-578] No Compatible Board Interface found.Board Tab not created
+exit
+INFO: [Common 17-206] Exiting Vivado at Sat Jun  6 08:22:42 2015...

@@ -1,0 +1,76 @@
+Copyright 1986-2014 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2014.4 (lin64) Build 1071353 Tue Nov 18 16:47:07 MST 2014
+| Date         : Thu Jun  4 11:57:42 2015
+| Host         : ubuntu running 64-bit Ubuntu 12.04.5 LTS
+| Command      : report_control_sets -verbose -file uart_control_sets_placed.rpt
+| Design       : uart
+| Device       : xc7z020
+------------------------------------------------------------------------------------
+
+Control Set Information
+
+Table of Contents
+-----------------
+1. Summary
+2. Flip-Flop Distribution
+3. Detailed Control Set Information
+
+1. Summary
+----------
+
++-------------------------------------------------------------------+-------+
+|                               Status                              | Count |
++-------------------------------------------------------------------+-------+
+| Number of unique control sets                                     |    23 |
+| Minimum Number of register sites lost to control set restrictions |    37 |
++-------------------------------------------------------------------+-------+
+
+
+2. Flip-Flop Distribution
+-------------------------
+
++--------------+-----------------------+------------------------+-----------------+--------------+
+| Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
++--------------+-----------------------+------------------------+-----------------+--------------+
+| No           | No                    | No                     |              70 |           19 |
+| No           | No                    | Yes                    |               0 |            0 |
+| No           | Yes                   | No                     |              68 |           24 |
+| Yes          | No                    | No                     |              68 |           19 |
+| Yes          | No                    | Yes                    |               0 |            0 |
+| Yes          | Yes                   | No                     |              37 |           11 |
++--------------+-----------------------+------------------------+-----------------+--------------+
+
+
+3. Detailed Control Set Information
+-----------------------------------
+
++--------------------+---------------------------------------+----------------------------------+------------------+----------------+
+|    Clock Signal    |             Enable Signal             |         Set/Reset Signal         | Slice Load Count | Bel Load Count |
++--------------------+---------------------------------------+----------------------------------+------------------+----------------+
+|  sys_clk_IBUF_BUFG | u_cpu/en_rx_data_avail                | u_cpu/tx_baudclk_en1             |                1 |              4 |
+|  sys_clk_IBUF_BUFG | u_cpu/u_rx/n_0_fifo_count[3]_i_1      | u_cpu/u_rx/n_0_addr_in[2]_i_1    |                1 |              4 |
+|  sys_clk_IBUF_BUFG | n_0_rx_data_shift[4]_i_1              |                                  |                3 |              4 |
+|  sys_clk_IBUF_BUFG | n_0_tx_data_cnt[3]_i_2                | u_cpu/O16                        |                1 |              4 |
+|  sys_clk_IBUF_BUFG | u_cpu/u_tx/n_0_fifo_count[3]_i_1__0   | u_cpu/u_tx/n_0_addr_in[2]_i_1__0 |                1 |              4 |
+|  sys_clk_IBUF_BUFG | u_cpu/n_0_tx_fifo_push_i_1            |                                  |                1 |              5 |
+|  sys_clk_IBUF_BUFG | u_cpu/n_0_dlab_i_1                    | u_cpu/tx_baudclk_en1             |                2 |              5 |
+|  sys_clk_IBUF_BUFG | n_0_rx_data_cnt[4]_i_1                |                                  |                1 |              5 |
+|  sys_clk_IBUF_BUFG |                                       | u_cpu/u_tx/n_0_addr_in[2]_i_1__0 |                3 |              6 |
+|  sys_clk_IBUF_BUFG |                                       | u_cpu/u_rx/n_0_addr_in[2]_i_1    |                3 |              6 |
+|  sys_clk_IBUF_BUFG | u_cpu/n_0_tx_fifo_din[7]_i_1          |                                  |                1 |              8 |
+|  sys_clk_IBUF_BUFG | u_cpu/n_0_scratch_reg[7]_i_1          |                                  |                3 |              8 |
+|  sys_clk_IBUF_BUFG | u_cpu/n_0_baud_terminal_count[15]_i_1 | u_cpu/tx_baudclk_en1             |                3 |              8 |
+|  sys_clk_IBUF_BUFG | u_cpu/n_0_baud_terminal_count[7]_i_1  | u_cpu/tx_baudclk_en1             |                2 |              8 |
+|  sys_clk_IBUF_BUFG | u_cpu/n_0_cpu_dout[7]_i_1             |                                  |                4 |              8 |
+|  sys_clk_IBUF_BUFG | rx_parity_err                         |                                  |                4 |             15 |
+|  sys_clk_IBUF_BUFG | u_cpu/E[0]                            |                                  |                3 |             16 |
+|  sys_clk_IBUF_BUFG |                                       | u_cpu/O6                         |                4 |             16 |
+|  sys_clk_IBUF_BUFG |                                       | u_cpu/O5                         |                4 |             16 |
+|  sys_clk_IBUF_BUFG | rx_fifo_push                          |                                  |                3 |             24 |
+|  sys_clk_IBUF_BUFG | u_cpu/n_0_tx_fifo_push_reg            |                                  |                3 |             24 |
+|  sys_clk_IBUF_BUFG |                                       | u_cpu/tx_baudclk_en1             |               10 |             24 |
+|  sys_clk_IBUF_BUFG |                                       |                                  |               19 |             70 |
++--------------------+---------------------------------------+----------------------------------+------------------+----------------+
+
+
